@@ -1,5 +1,8 @@
 package ru.anisart.intechtest;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -52,9 +55,12 @@ public class MainActivity extends ActionBarActivity {
                 return true;
             case R.id.action_view_mode:
                 viewAsGrid = !viewAsGrid;
-                adapter.setGridMode(viewAsGrid);
+                if (adapter != null) {
+                    adapter.setGridMode(viewAsGrid);
+                }
                 gridView.setNumColumns(viewAsGrid ? COLUMNS_GRID : COLUMNS_LIST);
                 item.setIcon(viewAsGrid ? R.drawable.ic_action_view_as_list : R.drawable.ic_action_view_as_grid);
+                item.setTitle(viewAsGrid ? R.string.action_list : R.string.action_grid);
                 return true;
 
         }
@@ -62,11 +68,21 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void refreshData() {
-        Toast.makeText(this, "Refreshing...", Toast.LENGTH_SHORT).show();
-        new RefreshTask().execute();
+        if (isNetworkAvailable()) {
+            Toast.makeText(this, "Refreshing...", Toast.LENGTH_SHORT).show();
+            new RefreshTask().execute();
+        } else {
+            Toast.makeText(this, "No internet connection!", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private class RefreshTask extends AsyncTask<Void, Void, Void> {  //TODO: SingleTask
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    private class RefreshTask extends AsyncTask<Void, Void, Void> {
 
         DataModel[] dataModels;
 
@@ -75,7 +91,6 @@ public class MainActivity extends ActionBarActivity {
             Log.d(TAG, "RefreshTask started");
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.getMessageConverters().add(new MappingJacksonHttpMessageConverter());
-            //TODO: Network is unreachable
             dataModels = restTemplate.getForObject(API_URI, DataModel[].class);
             return null;
         }
