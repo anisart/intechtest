@@ -9,13 +9,13 @@ import android.widget.*;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 public class MainActivity extends ActionBarActivity {
 
     private static final String TAG = "IntechTest";
+    private static final String API_URI = "http://62.152.36.68:8080/droid-test/common/data";
     private ListView listView;
     private GridView gridView;
     private ListAdapter adapter;
@@ -65,20 +65,18 @@ public class MainActivity extends ActionBarActivity {
         @Override
         protected Void doInBackground(Void... params) {
             Log.d(TAG, "RefreshTask started");
-            String url = "http://62.152.36.68:8080/droid-test/common/data";
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.getMessageConverters().add(new MappingJacksonHttpMessageConverter());
             //TODO: Network is unreachable
-            dataModels = restTemplate.getForObject(url, DataModel[].class);
-            if (dataModels.length != 0 && dataModels[0] != null) {
-                Log.d(TAG, dataModels[0].toString());
-            }
+            dataModels = restTemplate.getForObject(API_URI, DataModel[].class);
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            List<DataModel> dataList = Arrays.asList(dataModels);
+            List<DataModel> dataList = new ArrayList<DataModel>(Arrays.asList(dataModels));
+            dataList.removeAll(Collections.singleton(null));
+            dataList.addAll(dataList);
             adapter = new DataAdapter(getBaseContext(), dataList);
             listView.setAdapter(adapter);
             Log.d(TAG, "setAdapter()");

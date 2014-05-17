@@ -8,12 +8,16 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.List;
 
 public class DataAdapter extends ArrayAdapter<DataModel> {
 
     private static final String TAG = "IntechTest";
+    private static final boolean CACHE_IN_MEMORY = true;
+    private static final boolean CACHE_ON_DISK = true;
 
     private List<DataModel> dataList;
     private Context context;
@@ -65,7 +69,11 @@ public class DataAdapter extends ArrayAdapter<DataModel> {
 
         DataModel dataModel = dataList.get(position);
         if (dataModel != null) {
-            holder.imageView.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_launcher));
+            DisplayImageOptions options = new DisplayImageOptions.Builder()
+                    .cacheInMemory(CACHE_IN_MEMORY)
+                    .cacheOnDisc(CACHE_ON_DISK)
+                    .build();
+            ImageLoader.getInstance().displayImage(dataModel.getImg(), holder.imageView, options);
             holder.titleView.setText(dataModel.getTitle());
             holder.descrView.setText(dataModel.getDescription());
         } else {
