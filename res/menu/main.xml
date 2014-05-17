@@ -4,8 +4,9 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
             android:id="@+id/action_view_mode"
-            android:title="Grid"
-            app:showAsAction="never" />
+            android:title="@string/action_grid"
+            android:icon="@drawable/ic_action_view_as_grid"
+            app:showAsAction="always" />
     <item
             android:id="@+id/action_refresh"
             android:title="@string/action_refresh"

@@ -16,17 +16,22 @@ public class MainActivity extends ActionBarActivity {
 
     private static final String TAG = "IntechTest";
     private static final String API_URI = "http://62.152.36.68:8080/droid-test/common/data";
-    private ListView listView;
+    private static final int COLUMNS_LIST = 1;
+    private static final int COLUMNS_GRID = -1;
+
     private GridView gridView;
-    private ListAdapter adapter;
+    private DataAdapter adapter;
+
+    private boolean viewAsGrid = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        listView = (ListView) findViewById(R.id.list_view);
         gridView = (GridView) findViewById(R.id.grid_view);
+        gridView.setNumColumns(COLUMNS_LIST);
+        refreshData();
     }
 
     @Override
@@ -43,19 +48,22 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.action_refresh:
-                Toast.makeText(this, "Refreshing...", Toast.LENGTH_LONG).show();
-                new RefreshTask().execute();
+                refreshData();
                 return true;
             case R.id.action_view_mode:
-                if (adapter != null) {
-                    gridView.setAdapter(adapter);
-                    gridView.setVisibility(View.VISIBLE);
-                    listView.setVisibility(View.GONE);
-                    listView.setAdapter(null);
-                }
+                viewAsGrid = !viewAsGrid;
+                adapter.setGridMode(viewAsGrid);
+                gridView.setNumColumns(viewAsGrid ? COLUMNS_GRID : COLUMNS_LIST);
+                item.setIcon(viewAsGrid ? R.drawable.ic_action_view_as_list : R.drawable.ic_action_view_as_grid);
+                return true;
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void refreshData() {
+        Toast.makeText(this, "Refreshing...", Toast.LENGTH_SHORT).show();
+        new RefreshTask().execute();
     }
 
     private class RefreshTask extends AsyncTask<Void, Void, Void> {  //TODO: SingleTask
@@ -76,9 +84,8 @@ public class MainActivity extends ActionBarActivity {
         protected void onPostExecute(Void aVoid) {
             List<DataModel> dataList = new ArrayList<DataModel>(Arrays.asList(dataModels));
             dataList.removeAll(Collections.singleton(null));
-            dataList.addAll(dataList);
-            adapter = new DataAdapter(getBaseContext(), dataList);
-            listView.setAdapter(adapter);
+            adapter = new DataAdapter(getBaseContext(), dataList, viewAsGrid);
+            gridView.setAdapter(adapter);
             Log.d(TAG, "setAdapter()");
         }
     }

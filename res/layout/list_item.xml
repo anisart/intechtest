@@ -3,12 +3,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="horizontal"
               android:layout_width="match_parent"
-              android:layout_height="@dimen/list_item_height">
+              android:layout_height="wrap_content">
 
     <ImageView
             android:id="@+id/image_view"
-            android:layout_width="@dimen/list_item_height"
-            android:layout_height="@dimen/list_item_height"/>
+            android:layout_width="@dimen/image_size"
+            android:layout_height="@dimen/image_size"/>
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -18,14 +18,18 @@
         <TextView
                 android:id="@+id/title_view"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.5"/>
+                android:layout_height="@dimen/title_height"
+                android:textStyle="bold"
+                android:padding="@dimen/text_padding"
+                android:singleLine="true"/>
         <TextView
                 android:id="@+id/descr_view"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.5"/>
+                android:layout_height="@dimen/descr_height"
+                android:padding="@dimen/text_padding"
+                android:maxLines="3"
+                android:ellipsize="end"/>
 
-            </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

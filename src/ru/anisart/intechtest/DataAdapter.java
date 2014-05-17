@@ -21,50 +21,34 @@ public class DataAdapter extends ArrayAdapter<DataModel> {
 
     private List<DataModel> dataList;
     private Context context;
+    private boolean gridMode;
 
-    public DataAdapter(Context context, List<DataModel> dataList) {
+    public DataAdapter(Context context, List<DataModel> dataList, boolean gridMode) {
         super(context, R.layout.list_item, dataList);
 
         this.context = context;
         this.dataList = dataList;
-    }
-
-    @Override
-    public int getCount() {
-        return dataList.size();
-    }
-
-    @Override
-    public DataModel getItem(int position) {
-        return dataList.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return dataList.get(position).hashCode(); //TODO: WHY???
+        this.gridMode = gridMode;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
+        ViewHolder holder = null;
 
-        ViewHolder holder = new ViewHolder();
-
-        if (convertView == null) {
+        if (convertView == null || ((ViewHolder) convertView.getTag()).gridMode != gridMode) {
+            holder = new ViewHolder();
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.list_item, null);
+            convertView = inflater.inflate(gridMode ? R.layout.grid_item : R.layout.list_item, null);
 
-            ImageView imageView = (ImageView) view.findViewById(R.id.image_view);
-            TextView titleView = (TextView) view.findViewById(R.id.title_view);
-            TextView descrView = (TextView) view.findViewById(R.id.descr_view);
-
-            holder.imageView = imageView;
-            holder.titleView = titleView;
-            holder.descrView = descrView;
-
-            view.setTag(holder);
+            holder.gridMode = gridMode;
+            holder.imageView = (ImageView) convertView.findViewById(R.id.image_view);
+            holder.titleView = (TextView) convertView.findViewById(R.id.title_view);
+            if (!gridMode) {
+                holder.descrView = (TextView) convertView.findViewById(R.id.descr_view);
+            }
+            convertView.setTag(holder);
         } else {
-            holder = (ViewHolder) view.getTag();
+            holder = (ViewHolder) convertView.getTag();
         }
 
         DataModel dataModel = dataList.get(position);
@@ -74,16 +58,27 @@ public class DataAdapter extends ArrayAdapter<DataModel> {
                     .cacheOnDisc(CACHE_ON_DISK)
                     .build();
             ImageLoader.getInstance().displayImage(dataModel.getImg(), holder.imageView, options);
+
             holder.titleView.setText(dataModel.getTitle());
-            holder.descrView.setText(dataModel.getDescription());
+            if (!gridMode) {
+                holder.descrView.setText(dataModel.getDescription());
+            }
         } else {
             Log.w(TAG, "dataModel " + position + " is null");
         }
 
-        return view;
+        return convertView;
+    }
+
+    public void setGridMode(boolean gridMode) {
+        if (this.gridMode != gridMode) {
+            this.gridMode = gridMode;
+            notifyDataSetChanged();
+        }
     }
 
     private static class ViewHolder {
+        public boolean gridMode;
         public ImageView imageView;
         public TextView titleView;
         public TextView descrView;
