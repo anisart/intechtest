@@ -4,4 +4,5 @@
     <string name="action_refresh">Refresh</string>
     <string name="action_grid">View as Grid</string>
     <string name="action_list">View as List</string>
+    <string name="descr_image">Image</string>
 </resources>
