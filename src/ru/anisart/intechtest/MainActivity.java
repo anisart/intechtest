@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,11 +27,15 @@ public class MainActivity extends ActionBarActivity {
     private static final String API_URI = "http://62.152.36.68:8080/droid-test/common/data";
     private static final int COLUMNS_LIST = 1;
     private static final int COLUMNS_GRID = -1;
+    private static final long REFRESH_PERIOD = 60000L;
 
     private GridView gridView;
     private DataAdapter adapter;
 
     private boolean viewAsGrid = false;
+
+    private Handler timerHandler;
+    private Runnable timerTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,15 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(intent);
             }
         });
+
+        timerHandler = new Handler();
+        timerTask = new Runnable() {
+            @Override
+            public void run() {
+                refreshData();
+                timerHandler.postDelayed(timerTask, REFRESH_PERIOD);
+            }
+        };
         refreshData();
     }
 
@@ -65,7 +79,8 @@ public class MainActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_refresh:
-                refreshData();
+                timerHandler.removeCallbacks(timerTask);
+                timerHandler.post(timerTask);
                 break;
             case R.id.action_view_mode:
                 viewAsGrid = !viewAsGrid;
@@ -78,6 +93,18 @@ public class MainActivity extends ActionBarActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        timerHandler.postDelayed(timerTask, REFRESH_PERIOD);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        timerHandler.removeCallbacks(timerTask);
     }
 
     private void refreshData() {
